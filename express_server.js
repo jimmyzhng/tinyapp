@@ -11,6 +11,12 @@ app.get('/', (req, res) => {
   res.send('hello!');
 });
 
+// this shows the JSON string representing the entire obj
+app.get('/urls.json', (req, res) => {
+  res.json(urlDatabase);
+});
+
 app.listen(PORT, () => {
   console.log(`Ex app listening on port ${PORT}`);
 });
+
