@@ -9,8 +9,8 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
-const generateRandomString = () => {
-  Math.random().toString(36).slice(2, 8);
+const generateRandomString = function() {
+  return Math.random().toString(36).slice(2, 8);
 };
 
 app.use(express.urlencoded({ extended: true }));
@@ -38,9 +38,23 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const key = generateRandomString();
+
+  urlDatabase[key] = req.body.longURL;
+  res.redirect(`/urls/${key}`);
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  // let id = req.params.id;
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
 });
 
 //Sending HTML
