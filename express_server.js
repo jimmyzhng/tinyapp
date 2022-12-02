@@ -4,6 +4,7 @@ const app = express();
 const PORT = 8080; //default port 8080
 const bcrypt = require('bcryptjs');
 const helpers = require('./helpers.js');
+const methodOverride = require('method-override');
 
 app.set('view engine', 'ejs');
 
@@ -43,17 +44,6 @@ const generateRandomString = function() {
   return Math.random().toString(36).slice(2, 8);
 };
 
-// Returns URLs where the userID is equal to the id of current user
-const urlsForUser = (userID, urls) => {
-  const output = {};
-  for (const url in urls) {
-    if (urls[url].userID === userID) {
-      output[url] = urls[url];
-    }
-  }
-  return output;
-};
-
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 
@@ -61,6 +51,8 @@ app.use(cookieSession({
   name: 'session',
   keys: ['Poop', 'Peepee'],
 }));
+
+app.use(methodOverride('_method'));
 
 // Homepage
 app.get('/', (req, res) => {
@@ -77,11 +69,12 @@ app.get('/', (req, res) => {
 app.get('/urls', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    newUrls: urlsForUser(req.session.user_id, urlDatabase),
+    newUrls: helpers.urlsForUser(req.session.user_id, urlDatabase),
     users,
     cookies: req.session
   };
 
+  console.log(urlDatabase);
   if (!req.session.user_id) {
     return res.send('You must be logged in to create URLs!\n');
   }
@@ -96,8 +89,11 @@ app.post("/urls", (req, res) => {
   }
 
   const key = generateRandomString();
+  console.log(req.session.user_id);
   urlDatabase[key] = {};
   urlDatabase[key].longURL = req.body.longURL;
+  urlDatabase[key].userID = req.session.user_id;
+
 
   return res.redirect(`/urls/${key}`);
 });
@@ -135,7 +131,8 @@ app.get('/urls/:id', (req, res) => {
   return res.render('urls_show', templateVars);
 });
 
-app.post('/urls/:id', (req, res) => {
+// Editing URL
+app.put('/urls/:id', (req, res) => {
   let id = req.params.id;
   const user = req.session.user_id;
 
@@ -168,9 +165,10 @@ app.get("/u/:id", (req, res) => {
 });
 
 // Deleting URL
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
   let id = req.params.id;
   const user = req.session.user_id;
+  console.log('id', id);
 
   if (!urlDatabase[id]) {
     return res.status(404).send('Sorry, that ID does not exist!\n');

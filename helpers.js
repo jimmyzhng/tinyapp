@@ -8,5 +8,15 @@ const getUserByEmail = (email, users) => {
   return undefined;
 };
 
+// Returns URLs where the userID is equal to the id of current user
+const urlsForUser = (userID, urls) => {
+  const output = {};
+  for (const url in urls) {
+    if (urls[url].userID === userID) {
+      output[url] = urls[url];
+    }
+  }
+  return output;
+};
 
-module.exports = { getUserByEmail };
+module.exports = { getUserByEmail, urlsForUser };
