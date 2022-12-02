@@ -14,19 +14,19 @@ const urlDatabase = {
     longURL: 'http://www.lighthouselabs.ca',
     userID: "jimmyzhng",
     visitCount: 0,
-    uniqueVisitors: 0
+    uniqueVisitors: [],
   },
   '9sm5xK': {
     longURL: 'http://www.google.com',
     userID: "jimmyzhng",
     visitCount: 0,
-    uniqueVisitors: 0
+    uniqueVisitors: [],
   },
   '1a2b3c': {
     longURL: 'http://www.youtube.com',
     userID: "travis123",
     visitCount: 0,
-    uniqueVisitors: 0
+    uniqueVisitors: [],
   }
 };
 
@@ -169,12 +169,18 @@ app.put('/urls/:id', (req, res) => {
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
-
-  urlDatabase[id].visitCount += 1;
+  const user = req.session.user_id;
 
   if (!longURL) {
     return res.status(404).send('Sorry, that short URL does not exist!');
   }
+
+  if (!urlDatabase[id].uniqueVisitors.includes(user)) {
+    urlDatabase[id].uniqueVisitors.push(user);
+  }
+
+  urlDatabase[id].visitCount += 1;
+
   return res.redirect(longURL);
 });
 
@@ -182,7 +188,6 @@ app.get("/u/:id", (req, res) => {
 app.delete("/urls/:id", (req, res) => {
   let id = req.params.id;
   const user = req.session.user_id;
-  console.log('id', id);
 
   if (!urlDatabase[id]) {
     return res.status(404).send('Sorry, that ID does not exist!\n');
@@ -224,7 +229,8 @@ app.post("/login", (req, res) => {
   }
 
   if (!bcrypt.compareSync(password, users[user].hashedPw)) {
-    return res.status(403).send('Sorry, that password is invalid. You have 1 more try, or you will be IP banned from our website.');
+    return res.status(403)
+      .send(`Sorry, that password is invalid. You have 1 more attempt, or you will be IP banned from our website. <br/> <br/> <br/> (Just kidding.)`);
   }
 
   req.session.user_id = user;
@@ -261,7 +267,7 @@ app.post('/register', (req, res) => {
   }
 
   if (helpers.getUserByEmail(email, users)) {
-    return res.status(400).send('Sorry, that account already exists!');
+    return res.status(400).send('Sorry, that account already exists. Hope you did not forget your password, because we do not have a function for that yet!');
   }
 
   users[userId] = { userId, email, hashedPw };
