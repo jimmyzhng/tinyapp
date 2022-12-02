@@ -1,7 +1,7 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
 const app = express();
-const PORT = 8080; //default port 8080
+const PORT = 8080;
 const bcrypt = require('bcryptjs');
 const helpers = require('./helpers.js');
 const methodOverride = require('method-override');
@@ -12,15 +12,21 @@ app.set('view engine', 'ejs');
 const urlDatabase = {
   'b2xVn2': {
     longURL: 'http://www.lighthouselabs.ca',
-    userID: "jimmyzhng"
+    userID: "jimmyzhng",
+    visitCount: 0,
+    uniqueVisitors: 0
   },
   '9sm5xK': {
     longURL: 'http://www.google.com',
-    userID: "jimmyzhng"
+    userID: "jimmyzhng",
+    visitCount: 0,
+    uniqueVisitors: 0
   },
   '1a2b3c': {
     longURL: 'http://www.youtube.com',
-    userID: "travis123"
+    userID: "travis123",
+    visitCount: 0,
+    uniqueVisitors: 0
   }
 };
 
@@ -38,6 +44,12 @@ const users = {
     hashedPw: bcrypt.hashSync('123', 10)
   }
 };
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next(); // runs the next callback
+
+});
 
 // Random URL generator
 const generateRandomString = function() {
@@ -157,6 +169,8 @@ app.put('/urls/:id', (req, res) => {
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
+
+  urlDatabase[id].visitCount += 1;
 
   if (!longURL) {
     return res.status(404).send('Sorry, that short URL does not exist!');
