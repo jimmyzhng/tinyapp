@@ -19,4 +19,9 @@ const urlsForUser = (userID, urls) => {
   return output;
 };
 
-module.exports = { getUserByEmail, urlsForUser };
+// Random URL generator
+const generateRandomString = function() {
+  return Math.random().toString(36).slice(2, 8);
+};
+
+module.exports = { getUserByEmail, urlsForUser, generateRandomString };
