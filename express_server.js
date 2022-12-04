@@ -64,6 +64,12 @@ app.use(cookieSession({
   keys: ['Poop', 'Peepee'],
 }));
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next(); // runs the next callback
+
+});
+
 app.use(methodOverride('_method'));
 
 // Homepage
@@ -74,6 +80,7 @@ app.get('/', (req, res) => {
 
   return res.redirect('/login');
 });
+
 
 // URL Stuff
 
@@ -99,13 +106,14 @@ app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     return res.send('You must be logged in to create URLs!\n');
   }
-
   const key = generateRandomString();
-  console.log(req.session.user_id);
-  urlDatabase[key] = {};
-  urlDatabase[key].longURL = req.body.longURL;
-  urlDatabase[key].userID = req.session.user_id;
 
+  urlDatabase[key] = {
+    longURL: req.body.longURL,
+    userID: req.session.user_id,
+    visitCount: 0,
+    uniqueVisitors: []
+  };
 
   return res.redirect(`/urls/${key}`);
 });
