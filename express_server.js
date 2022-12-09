@@ -100,7 +100,7 @@ app.get('/urls/:id', (req, res) => {
 });
 
 // Editing URL
-app.put('/urls/:id', (req, res) => {
+app.post('/urls/:id', (req, res) => {
   let id = req.params.id;
   const user = req.session.user_id;
 
@@ -141,7 +141,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 // Deleting URL
-app.delete("/urls/:id", (req, res) => {
+app.post("/urls/:id/delete", (req, res) => {
   let id = req.params.id;
   const user = req.session.user_id;
 
